@@ -1,171 +1,278 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* =========================================================
+   Portfolio Ahmed Layouni — script.js
+   Loader, particles, reveal, tilt, compteur, console KQL
+   typée, onglets, filtres, copie mail, horloge, retour haut.
+   ========================================================= */
+(() => {
+"use strict";
 
-  // Menu mobile burger
-  const burger = document.querySelector(".burger");
-  const nav = document.getElementById("menu");
-  if (burger && nav) {
-    burger.addEventListener("click", () => {
-      const isOpen = nav.classList.toggle("open");
-      burger.setAttribute("aria-expanded", String(isOpen));
-    });
-    nav.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        nav.classList.remove("open");
-        burger.setAttribute("aria-expanded", "false");
-      });
-    });
+const $  = (s, c = document) => c.querySelector(s);
+const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- 1. Loader ---------- */
+const loader = $("#loader");
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    loader.classList.add("done");
+    startHeroType();
+    startKql();
+  }, reduced ? 100 : 2300);
+});
+// Sécurité : masquer le loader même si un asset bloque
+setTimeout(() => { loader.classList.add("done"); startHeroType(); startKql(); }, 5000);
+
+/* ---------- 2. Barre de progression + header + retour haut ---------- */
+const progress = $(".scroll-progress");
+const bar = $("#bar");
+const backTop = $("#back-top");
+function onScroll() {
+  const h = document.documentElement;
+  const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  progress.style.width = pct + "%";
+  bar.classList.toggle("scrolled", h.scrollTop > 30);
+  backTop.hidden = false;
+  backTop.classList.toggle("show", h.scrollTop > 600);
+}
+window.addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+backTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+/* ---------- 3. Halo curseur ---------- */
+const glow = $(".cursor-glow");
+let gx = innerWidth / 2, gy = innerHeight / 3, tx = gx, ty = gy;
+addEventListener("pointermove", e => { tx = e.clientX; ty = e.clientY; });
+(function moveGlow() {
+  gx += (tx - gx) * 0.08;
+  gy += (ty - gy) * 0.08;
+  glow.style.left = gx + "px";
+  glow.style.top  = gy + "px";
+  requestAnimationFrame(moveGlow);
+})();
+
+/* ---------- 4. Particules canvas ---------- */
+const canvas = $("#particles");
+const ctx = canvas.getContext("2d");
+let W, H, parts = [];
+function resize() {
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+}
+resize();
+addEventListener("resize", resize);
+const COLORS = ["0,229,160", "77,124,255", "185,107,255"];
+function spawn() {
+  parts = Array.from({ length: Math.min(70, innerWidth / 18) }, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
+    r: Math.random() * 1.8 + .6,
+    c: COLORS[Math.random() * COLORS.length | 0],
+    a: Math.random() * .5 + .15
+  }));
+}
+spawn();
+addEventListener("resize", spawn);
+(function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  for (const p of parts) {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, 7);
+    ctx.fillStyle = `rgba(${p.c},${p.a})`;
+    ctx.fill();
   }
-
-  // Barre de progression du scroll & lueur curseur
-  const progressBar = document.querySelector(".scroll-progress");
-  const cursorGlow = document.querySelector(".cursor-glow");
-
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!progressBar) return;
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = docHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / docHeight) * 100)) : 0;
-      progressBar.style.width = `${pct}%`;
-    },
-    { passive: true }
-  );
-
-  if (cursorGlow && !prefersReducedMotion) {
-    window.addEventListener(
-      "pointermove",
-      (e) => {
-        cursorGlow.style.left = `${e.clientX}px`;
-        cursorGlow.style.top = `${e.clientY}px`;
-      },
-      { passive: true }
-    );
-  }
-
-  // Apparition au scroll (IntersectionObserver)
-  const revealEls = document.querySelectorAll(".reveal");
-  if (prefersReducedMotion || !("IntersectionObserver" in window)) {
-    revealEls.forEach((el) => el.classList.add("is-visible"));
-  } else {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -30px 0px" }
-    );
-    revealEls.forEach((el) => observer.observe(el));
-  }
-
-  // Compteurs animés des métriques
-  const counters = document.querySelectorAll(".metric-val[data-target]");
-  const animateCounter = (el) => {
-    const target = Number(el.dataset.target || 0);
-    if (prefersReducedMotion) {
-      el.textContent = target.toLocaleString("fr-FR");
-      return;
+  // lignes entre particules proches
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = i + 1; j < parts.length; j++) {
+      const a = parts[i], b = parts[j];
+      const d = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+      if (d < 12000) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(77,124,255,${(1 - d / 12000) * .12})`;
+        ctx.stroke();
+      }
     }
-    const duration = 1100;
-    const start = performance.now();
-    const step = (now) => {
-      const progress = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - progress, 3);
+  }
+  if (!reduced) requestAnimationFrame(drawParticles);
+})();
+
+/* ---------- 5. Reveal au scroll ---------- */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+$$(".reveal").forEach(el => io.observe(el));
+
+/* ---------- 6. Effet tilt 3D sur les cartes ---------- */
+if (matchMedia("(pointer:fine)").matches && !reduced) {
+  $$(".tilt-card").forEach(card => {
+    card.addEventListener("pointermove", e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5;
+      const y = (e.clientY - r.top) / r.height - .5;
+      card.style.transform =
+        `perspective(800px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg) translateY(-3px)`;
+    });
+    card.addEventListener("pointerleave", () => { card.style.transform = ""; });
+  });
+}
+
+/* ---------- 7. Compteurs animés ---------- */
+const counterIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    counterIO.unobserve(el);
+    const target = +el.dataset.target;
+    const dur = 1600, t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.round(target * eased).toLocaleString("fr-FR");
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  };
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}, { threshold: 0.6 });
+$$(".metric-val").forEach(el => counterIO.observe(el));
 
-  if (counters.length > 0) {
-    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
-      counters.forEach(animateCounter);
-    } else {
-      const counterObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              animateCounter(entry.target);
-              counterObs.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.3 }
-      );
-      counters.forEach((c) => counterObs.observe(c));
+/* ---------- 8. Titres tapés (hero) ---------- */
+const PHRASES = ["alertes utiles.", "détections MITRE.", "playbooks SOAR.", "chasses aux menaces."];
+let heroStarted = false;
+const typeTarget = $("#type-hero");
+function startHeroType() {
+  if (heroStarted || reduced) return;
+  heroStarted = true;
+  let pi = 0, ci = 0, deleting = false;
+  (function loop() {
+    const word = PHRASES[pi];
+    if (!deleting) {
+      ci++;
+      typeTarget.textContent = word.slice(0, ci);
+      if (ci === word.length) { deleting = true; return setTimeout(loop, 1800); }
+      return setTimeout(loop, 70);
     }
-  }
+    ci--;
+    typeTarget.textContent = word.slice(0, ci);
+    if (ci === 0) { deleting = false; pi = (pi + 1) % PHRASES.length; return setTimeout(loop, 350); }
+    setTimeout(loop, 35);
+  })();
+}
 
-  // Animation ligne par ligne de la requête KQL + alerte SOC
-  const lines = Array.from(document.querySelectorAll("#kql-code .ln"));
-  const alertBox = document.getElementById("kql-alert");
-  const replayBtn = document.getElementById("replay-kql");
-  let kqlTimerIds = [];
+/* ---------- 9. Console KQL animée ---------- */
+const KQL_LINES = [
+  [['f', 'CommonSecurityLog']],
+  [['p', '| '], ['k', 'where'], ['t', ' DeviceVendor == '], ['s', '"Fortinet"']],
+  [['p', '| '], ['k', 'where'], ['t', ' Activity '], ['k', 'contains'], ['t', ' '], ['s', '"login failed"']],
+  [['p', '| '], ['k', 'summarize'], ['t', ' echecs = '], ['f', 'count()'], ['t', ' '], ['k', 'by'], ['t', ' SourceIP, '], ['f', 'bin(TimeGenerated, 5m)']],
+  [['p', '| '], ['k', 'where'], ['t', ' echecs > 10']]
+];
+const kqlEl = $("#typed-kql");
+const alertEl = $("#kql-alert");
+let kqlStarted = false;
+function renderKql(lines) {
+  kqlEl.innerHTML = lines.map(l =>
+    l.map(([cls, txt]) => `<span class="${cls}">${txt}</span>`).join("")
+  ).join("\n");
+}
+function startKql() {
+  if (kqlStarted) return;
+  kqlStarted = true;
+  alertEl.classList.remove("show");
+  if (reduced) { renderKql(KQL_LINES); alertEl.classList.add("show"); return; }
+  kqlEl.innerHTML = "";
+  let li = 0;
+  (function typeLine() {
+    if (li >= KQL_LINES.length) { alertEl.classList.add("show"); return; }
+    const parts = KQL_LINES[li];
+    const span = document.createElement("span");
+    kqlEl.appendChild(span);
+    kqlEl.appendChild(document.createTextNode("\n"));
+    let pi = 0, ci = 0;
+    const cur = document.createElement("span");
+    cur.className = "caret-block";
+    (function typeChar() {
+      if (pi >= parts.length) { li++; return setTimeout(typeLine, 140); }
+      const [cls, txt] = parts[pi];
+      if (ci === 0) {
+        const s = document.createElement("span");
+        s.className = cls;
+        span.appendChild(s);
+        span.appendChild(cur);
+      }
+      ci++;
+      const target = span.children[span.children.length - 2] || span;
+      target.textContent = txt.slice(0, ci);
+      if (ci === txt.length) { pi++; ci = 0; }
+      setTimeout(typeChar, 16 + Math.random() * 22);
+    })();
+  })();
+}
+$("#replay-kql").addEventListener("click", () => { kqlStarted = false; startKql(); });
 
-  const clearKqlTimers = () => {
-    kqlTimerIds.forEach((id) => clearTimeout(id));
-    kqlTimerIds = [];
-  };
+/* ---------- 10. Onglets compétences ---------- */
+$$(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    $$(".tab").forEach(t => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+    tab.classList.add("active");
+    tab.setAttribute("aria-selected", "true");
+    $$(".tab-panel").forEach(p => p.classList.remove("active"));
+    $("#panel-" + tab.dataset.tab).classList.add("active");
+  });
+});
 
-  const playKqlAnimation = () => {
-    clearKqlTimers();
-    if (prefersReducedMotion) {
-      lines.forEach((l) => l.classList.remove("hidden-line"));
-      if (alertBox) alertBox.classList.add("visible");
-      return;
-    }
-    lines.forEach((l) => l.classList.add("hidden-line"));
-    if (alertBox) alertBox.classList.remove("visible");
-
-    lines.forEach((line, idx) => {
-      const t = setTimeout(() => {
-        line.classList.remove("hidden-line");
-      }, 220 + idx * 240);
-      kqlTimerIds.push(t);
-    });
-
-    const alertTimer = setTimeout(() => {
-      if (alertBox) alertBox.classList.add("visible");
-    }, 220 + lines.length * 240 + 250);
-    kqlTimerIds.push(alertTimer);
-  };
-
-  playKqlAnimation();
-  if (replayBtn) {
-    replayBtn.addEventListener("click", playKqlAnimation);
-  }
-
-  // Filtrage des projets
-  const filterButtons = document.querySelectorAll(".filter-btn");
-  const projectCards = document.querySelectorAll(".project-card");
-  filterButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const filter = btn.dataset.filter;
-      filterButtons.forEach((b) => b.classList.toggle("active", b === btn));
-      projectCards.forEach((card) => {
-        const match = filter === "all" || card.dataset.category === filter;
-        card.classList.toggle("is-hidden", !match);
-      });
+/* ---------- 11. Filtres projets ---------- */
+$$(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $$(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const f = btn.dataset.filter;
+    $$(".project-card").forEach(card => {
+      const show = f === "all" || card.dataset.category === f;
+      card.classList.toggle("hidden-card", !show);
+      card.classList.remove("pop");
+      if (show) { void card.offsetWidth; card.classList.add("pop"); }
     });
   });
-
-  // Inclinaison 3D douce au survol des cartes
-  if (!prefersReducedMotion) {
-    document.querySelectorAll(".tilt-card").forEach((card) => {
-      card.addEventListener("pointermove", (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        card.style.transform = `perspective(900px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 4).toFixed(2)}deg)`;
-      });
-      card.addEventListener("pointerleave", () => {
-        card.style.transform = "";
-      });
-    });
-  }
 });
+
+/* ---------- 12. Menu mobile ---------- */
+const burger = $("#burger");
+const menu = $("#menu");
+burger.addEventListener("click", () => {
+  const open = menu.classList.toggle("open");
+  burger.classList.toggle("open", open);
+  burger.setAttribute("aria-expanded", open);
+});
+$$("#menu a").forEach(a => a.addEventListener("click", () => {
+  menu.classList.remove("open");
+  burger.classList.remove("open");
+}));
+
+/* ---------- 13. Copier l'e-mail ---------- */
+$("#copy-mail").addEventListener("click", async () => {
+  const mail = "ahmedlayouni.17@gmail.com";
+  try { await navigator.clipboard.writeText(mail); }
+  catch {
+    const tmp = document.createElement("textarea");
+    tmp.value = mail; document.body.appendChild(tmp);
+    tmp.select(); document.execCommand("copy"); tmp.remove();
+  }
+  const msg = $("#copied-msg");
+  msg.hidden = false;
+  clearTimeout(msg._t);
+  msg._t = setTimeout(() => (msg.hidden = true), 2200);
+});
+
+/* ---------- 14. Horloge footer (UTC+1) ---------- */
+const clock = $("#clock");
+function tickClock() {
+  clock.textContent = "uptime " + new Date().toLocaleTimeString("fr-FR", { hour12: false });
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+})();
