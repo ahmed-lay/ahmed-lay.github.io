@@ -276,3 +276,20 @@ tickClock();
 setInterval(tickClock, 1000);
 
 })();
+window.addEventListener("load", () => {
+  const preloader = document.querySelector(".preloader, #preloader, .boot-screen, #boot");
+  if (preloader) {
+    preloader.style.opacity = "0";
+    preloader.style.pointerEvents = "none";
+    setTimeout(() => {
+      preloader.style.display = "none";
+    }, 300);
+  }
+});
+
+// Secours absolu après 1500 ms si "load" ne ferme pas l'écran
+setTimeout(() => {
+  document.querySelectorAll(".preloader, #preloader, .boot-screen, #boot").forEach((el) => {
+    el.style.display = "none";
+  });
+}, 1500);
