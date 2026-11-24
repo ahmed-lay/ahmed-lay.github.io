@@ -1,20 +1,27 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ahmed Layouni – Élève ingénieur en cybersécurité</title>
+<title>Ahmed Layouni — Élève ingénieur en cybersécurité</title>
 <meta name="description" content="Portfolio d’Ahmed Layouni, élève ingénieur en cybersécurité : Microsoft Sentinel, KQL, sécurité réseau, projets et certifications.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
 </head>
-<body>
+<body id="top">
+
+<div class="scroll-progress" aria-hidden="true"></div>
+<div class="cursor-glow" aria-hidden="true"></div>
+<div class="cyber-grid" aria-hidden="true"></div>
 
 <header class="bar">
-  <a class="brand" href="#top">Ahmed Layouni</a>
+  <a class="brand" href="#top">
+    <span class="status-dot" aria-hidden="true"></span>
+    <span>Ahmed Layouni</span>
+  </a>
   <button class="burger" aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">Menu</button>
   <nav id="menu">
     <a href="#parcours">Parcours</a>
@@ -25,121 +32,182 @@
   </nav>
 </header>
 
-<main id="top">
+<main>
   <section class="hero wrap">
-    <div class="hero-text">
-      <h1>Je transforme les journaux de sécurité en alertes utiles.</h1>
-      <p>Je suis élève ingénieur en informatique, spécialité cybersécurité, à l’EPI Digital School. Je recherche un stage de fin d’études à partir de février 2027 : sécurité opérationnelle, gestion des vulnérabilités ou sécurité cloud.</p>
+    <div class="hero-text reveal">
+      <div class="badge-row">
+        <span class="badge">Stage PFE · Fév – Juil 2027</span>
+        <span class="badge badge-alt">SOC · Cloud · Réseau</span>
+      </div>
+      <h1>Je transforme les journaux de sécurité en <span class="grad-text">alertes utiles.</span></h1>
+      <p>Élève ingénieur en informatique, spécialité cybersécurité, à l’EPI Digital School. À la recherche d’un stage de fin d’études à partir de février 2027 : sécurité opérationnelle (SOC/SIEM), gestion des vulnérabilités ou sécurité cloud.</p>
       <p class="cta">
-        <a class="btn" href="#projets">Voir mes projets</a>
-        <a class="btn alt" href="CV_Ahmed_Layouni_PFE.pdf" download>Télécharger mon CV</a>
+        <a class="btn btn-primary" href="#projets">Explorer mes projets</a>
+        <a class="btn btn-ghost" href="CV_Ahmed_Layouni_PFE.pdf" download>Télécharger mon CV</a>
       </p>
+      <div class="hero-metrics">
+        <div class="metric">
+          <span class="metric-val" data-target="18670">0</span>
+          <span class="metric-lbl">E-mails analysés (PhishShield AI+)</span>
+        </div>
+        <div class="metric">
+          <span class="metric-val" data-target="5">0</span>
+          <span class="metric-lbl">Règles KQL MITRE ATT&amp;CK</span>
+        </div>
+        <div class="metric">
+          <span class="metric-val" data-target="6">0</span>
+          <span class="metric-lbl">Mois de stage PFE visés</span>
+        </div>
+      </div>
     </div>
-    <figure class="console">
-      <pre aria-label="Exemple de requête KQL"><code><span class="ln"><span class="f">CommonSecurityLog</span></span><span class="ln"><span class="p">| </span><span class="k">where</span> DeviceVendor == <span class="s">"Fortinet"</span></span><span class="ln"><span class="p">| </span><span class="k">where</span> Activity <span class="k">contains</span> <span class="s">"login failed"</span></span><span class="ln"><span class="p">| </span><span class="k">summarize</span> echecs = <span class="f">count</span>() <span class="k">by</span> SourceIP, <span class="f">bin</span>(TimeGenerated, 5m)</span><span class="ln"><span class="p">| </span><span class="k">where</span> echecs &gt; 10</span></code></pre>
-      <div class="alert" role="status"><strong>Alerte : tentatives de force brute</strong><span>MITRE ATT&amp;CK T1110, 14 échecs en 5 minutes</span></div>
-      <figcaption>Exemple de règle d’analyse Microsoft Sentinel, dans l’esprit de celles écrites pendant mon stage.</figcaption>
+
+    <figure class="console tilt-card reveal" aria-label="Console interactive de détection KQL">
+      <div class="console-top">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="console-title">sentinel-rule-t1110.kql</span>
+        <button type="button" class="mini-btn" id="replay-kql">Rejouer</button>
+      </div>
+      <pre id="kql-code"><code><span class="ln"><span class="f">CommonSecurityLog</span></span><span class="ln"><span class="p">| </span><span class="k">where</span> DeviceVendor == <span class="s">"Fortinet"</span></span><span class="ln"><span class="p">| </span><span class="k">where</span> Activity <span class="k">contains</span> <span class="s">"login failed"</span></span><span class="ln"><span class="p">| </span><span class="k">summarize</span> echecs = <span class="f">count</span>() <span class="k">by</span> SourceIP, <span class="f">bin</span>(TimeGenerated, 5m)</span><span class="ln"><span class="p">| </span><span class="k">where</span> echecs &gt; 10</span></code></pre>
+      <div class="alert" role="status" id="kql-alert">
+        <span class="alert-pulse" aria-hidden="true"></span>
+        <div>
+          <strong>Alerte : tentatives de force brute</strong>
+          <span>MITRE ATT&amp;CK T1110 · 14 échecs en 5 minutes</span>
+        </div>
+      </div>
+      <figcaption>Simulation d’une règle d’analyse Microsoft Sentinel dans l’esprit des détections déployées lors de mon stage.</figcaption>
     </figure>
   </section>
 
-  <section id="parcours" class="wrap">
-    <h2>Parcours</h2>
+  <section id="parcours" class="wrap section">
+    <div class="section-head reveal">
+      <span class="kicker">01 / Expérience &amp; Formation</span>
+      <h2>Parcours</h2>
+    </div>
     <ol class="timeline">
-      <li>
+      <li class="reveal tilt-card">
         <time>Juillet 2026</time>
         <div>
-          <h3>Stagiaire d’été en cybersécurité, Tawasol Technology (Tunis)</h3>
+          <h3>Stagiaire d’été en cybersécurité — Tawasol Technology (Tunis)</h3>
           <ul>
-            <li>Déploiement d’un environnement Microsoft Sentinel sur Azure : architecture SIEM/SOAR, espace Log Analytics et machine virtuelle Linux collectrice CEF/Syslog, testée avec des journaux FortiGate simulés.</li>
-            <li>Écriture de requêtes KQL et de 5 règles d’analyse personnalisées alignées sur MITRE ATT&amp;CK.</li>
+            <li>Déploiement d’un environnement Microsoft Sentinel sur Azure : architecture SIEM/SOAR, espace Log Analytics et machine virtuelle Linux collectrice CEF/Syslog, validée avec des journaux FortiGate simulés.</li>
+            <li>Rédaction de requêtes KQL et de 5 règles d’analyse personnalisées alignées sur MITRE ATT&amp;CK.</li>
             <li>Automatisation de la réponse aux incidents avec 2 playbooks Logic Apps et création de classeurs SOC pour le triage.</li>
-            <li>Rédaction de la documentation technique : architecture, configuration, résultats des tests, recommandations.</li>
+            <li>Production de la documentation technique : architecture, configuration, résultats de tests et recommandations.</li>
           </ul>
         </div>
       </li>
-      <li>
+      <li class="reveal tilt-card">
         <time>2024 – 2027</time>
         <div>
           <h3>Diplôme d’ingénieur en informatique, spécialité cybersécurité</h3>
-          <p>EPI Digital School, diplôme prévu en 2027, après le cycle préparatoire (2022 – 2024).</p>
+          <p>EPI Digital School, Sousse — obtention prévue en 2027 après le cycle préparatoire (2022 – 2024).</p>
         </div>
       </li>
-      <li>
+      <li class="reveal tilt-card">
         <time>2021 – 2022</time>
         <div>
-          <h3>Études en informatique, ISSAT Sousse</h3>
-          <p>Vice-président de l’IEEE Student Branch de l’ISSAT Sousse.</p>
+          <h3>Études en informatique — ISSAT Sousse</h3>
+          <p>Engagement associatif en tant que vice-président de l’IEEE Student Branch de l’ISSAT Sousse.</p>
         </div>
       </li>
     </ol>
   </section>
 
-  <section id="projets" class="wrap">
-    <h2>Projets</h2>
-    <article class="project">
-      <div>
-        <h3>PhishShield AI+</h3>
-        <p class="stack">Python, scikit-learn, LIME. Projet académique.</p>
+  <section id="projets" class="wrap section">
+    <div class="section-head reveal">
+      <span class="kicker">02 / Réalisations techniques</span>
+      <h2>Projets</h2>
+      <div class="filter-bar" role="group" aria-label="Filtrer les projets">
+        <button type="button" class="filter-btn active" data-filter="all">Tous</button>
+        <button type="button" class="filter-btn" data-filter="detection">Détection &amp; IA</button>
+        <button type="button" class="filter-btn" data-filter="reseau">Sécurité réseau</button>
       </div>
-      <div>
-        <p>Plateforme de détection explicable des e-mails de phishing. Elle combine TF-IDF et Random Forest (3 classes, score F1 de 0,91 pour le phishing, entraînement sur 18 670 e-mails Enron-Spam et Kaggle), l’analyse d’URL, les vérifications SPF/DKIM/DMARC et l’explicabilité avec LIME.</p>
-        <p>Elle ajoute un score de risque de 0 à 100, une API REST, un tableau de bord et une surveillance en temps réel des boîtes mail via IMAP.</p>
-        <p><a href="https://github.com/ahmed-lay">Voir le code sur GitHub</a></p>
-      </div>
-    </article>
-    <article class="project">
-      <div>
-        <h3>Réseau virtuel sécurisé</h3>
-        <p class="stack">pfSense, OpenVPN, VMware.</p>
-      </div>
-      <div>
-        <p>Architecture LAN/WAN/DMZ segmentée avec règles de pare-feu, accès distant OpenVPN, sécurisation SSH et filtrage DNS. Les politiques de trafic ont été validées par des tests.</p>
-      </div>
-    </article>
-    <article class="project">
-      <div>
-        <h3>Réseau de campus sécurisé</h3>
-        <p class="stack">Cisco Packet Tracer.</p>
-      </div>
-      <div>
-        <p>Mise en œuvre des VLAN, EtherChannel, STP, routage inter-VLAN, OSPF et HSRP. Le périmètre est protégé par un Cisco ASA (NAT, ACL, DMZ), avec un réseau sans fil WLC et des services Windows Server.</p>
-      </div>
-    </article>
+    </div>
+
+    <div class="projects-grid">
+      <article class="project-card tilt-card reveal" data-category="detection">
+        <div class="project-top">
+          <span class="tag">IA &amp; Détection</span>
+          <h3>PhishShield AI+</h3>
+          <p class="stack">Python · scikit-learn · LIME</p>
+        </div>
+        <p>Plateforme explicable de détection d’e-mails de phishing combinant TF-IDF et Random Forest (3 classes, F1-score de 0,91 sur le phishing, entraînement sur 18 670 e-mails Enron-Spam et Kaggle), analyse d’URL, vérifications SPF/DKIM/DMARC et explicabilité LIME.</p>
+        <p>Score de risque de 0 à 100, API REST, tableau de bord et surveillance IMAP en temps réel.</p>
+        <a class="text-link" href="https://github.com/ahmed-lay" target="_blank" rel="noopener">Voir sur GitHub →</a>
+      </article>
+
+      <article class="project-card tilt-card reveal" data-category="reseau">
+        <div class="project-top">
+          <span class="tag">Pare-feu &amp; VPN</span>
+          <h3>Réseau virtuel sécurisé</h3>
+          <p class="stack">pfSense · OpenVPN · VMware</p>
+        </div>
+        <p>Architecture LAN / WAN / DMZ segmentée avec règles de pare-feu granulaires, accès distant sécurisé via OpenVPN, durcissement SSH et filtrage DNS.</p>
+        <p>Validation complète des politiques de flux et d’isolation par scénarios de test.</p>
+      </article>
+
+      <article class="project-card tilt-card reveal" data-category="reseau">
+        <div class="project-top">
+          <span class="tag">Infrastructure</span>
+          <h3>Réseau de campus sécurisé</h3>
+          <p class="stack">Cisco Packet Tracer · ASA</p>
+        </div>
+        <p>Déploiement de VLAN, EtherChannel, STP, routage inter-VLAN, OSPF et HSRP, protégé en périphérie par un pare-feu Cisco ASA (NAT, ACL, DMZ).</p>
+        <p>Intégration d’une architecture sans fil WLC et de services Windows Server.</p>
+      </article>
+    </div>
   </section>
 
-  <section id="competences" class="wrap">
-    <h2>Compétences</h2>
-    <dl class="skills">
-      <dt>Sécurité opérationnelle et cloud</dt>
-      <dd>Microsoft Sentinel, Azure, Log Analytics, KQL, Logic Apps, MITRE ATT&amp;CK, CEF/Syslog</dd>
-      <dt>Vulnérabilités et sécurité offensive</dt>
-      <dd>Nmap, Burp Suite, Metasploit, évaluation des vulnérabilités, OWASP Top 10, reconnaissance</dd>
-      <dt>Sécurité réseau</dt>
-      <dd>pfSense, Cisco ASA, ACL, OpenVPN, filtrage DNS, segmentation réseau, Wireshark</dd>
-      <dt>Gouvernance et conformité</dt>
-      <dd>ISO/IEC 27001, SMSI, analyse de risques, mesures de sécurité</dd>
-      <dt>Systèmes et outils</dt>
-      <dd>Linux, Windows Server, Docker, virtualisation, Cisco Packet Tracer</dd>
-      <dt>Programmation</dt>
-      <dd>Python, C++, JavaScript</dd>
-      <dt>Langues</dt>
-      <dd>Arabe (langue maternelle), français (C1), anglais (C1)</dd>
-    </dl>
+  <section id="competences" class="wrap section">
+    <div class="section-head reveal">
+      <span class="kicker">03 / Stack &amp; Savoir-faire</span>
+      <h2>Compétences</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card tilt-card reveal">
+        <h3>Sécurité opérationnelle &amp; cloud</h3>
+        <p>Microsoft Sentinel, Azure, Log Analytics, KQL, Logic Apps, MITRE ATT&amp;CK, CEF / Syslog</p>
+      </div>
+      <div class="skill-card tilt-card reveal">
+        <h3>Vulnérabilités &amp; offensif</h3>
+        <p>Nmap, Burp Suite, Metasploit, évaluation des vulnérabilités, OWASP Top 10, reconnaissance</p>
+      </div>
+      <div class="skill-card tilt-card reveal">
+        <h3>Sécurité réseau</h3>
+        <p>pfSense, Cisco ASA, ACL, OpenVPN, filtrage DNS, segmentation réseau, Wireshark</p>
+      </div>
+      <div class="skill-card tilt-card reveal">
+        <h3>Gouvernance &amp; conformité</h3>
+        <p>ISO/IEC 27001, SMSI, analyse de risques, mesures de sécurité</p>
+      </div>
+      <div class="skill-card tilt-card reveal">
+        <h3>Systèmes &amp; outils</h3>
+        <p>Linux, Windows Server, Docker, virtualisation, Cisco Packet Tracer</p>
+      </div>
+      <div class="skill-card tilt-card reveal">
+        <h3>Programmation &amp; langues</h3>
+        <p>Python, C++, JavaScript · Arabe (natif), Français (C1), Anglais (C1)</p>
+      </div>
+    </div>
   </section>
 
-  <section id="certifications" class="wrap">
-    <h2>Certifications et distinctions</h2>
+  <section id="certifications" class="wrap section">
+    <div class="section-head reveal">
+      <span class="kicker">04 / Accréditations &amp; Engagement</span>
+      <h2>Certifications et distinctions</h2>
+    </div>
     <div class="two">
-      <div>
+      <div class="info-box tilt-card reveal">
         <h3>Certifications</h3>
         <ul>
           <li>Cisco Networking Academy : CCNA 1, CCNA 2, CCNA 3</li>
           <li>Fortinet NSE 3, Certified in Cybersecurity, FortiGate 7.6 Operator (novembre 2026)</li>
-          <li>Centri, Introduction à l’analyse réseau (novembre 2026)</li>
+          <li>Centri : Introduction à l’analyse réseau (novembre 2026)</li>
           <li>ISO/IEC 27001 : système de management de la sécurité de l’information (certificat académique)</li>
         </ul>
       </div>
-      <div>
+      <div class="info-box tilt-card reveal">
         <h3>Distinctions et activités</h3>
         <ul>
           <li>Chef d’équipe étudiant — Nuit de l’Info, EPI Digital School (décembre 2025)</li>
@@ -150,20 +218,24 @@
     </div>
   </section>
 
-  <section id="contact" class="wrap">
-    <h2>Contact</h2>
-    <p class="lead">Un stage de fin d’études, un projet, une question ? Écrivez-moi.</p>
+  <section id="contact" class="wrap section contact-box reveal">
+    <span class="kicker">05 / Contact</span>
+    <h2>Discutons de votre équipe ou de mon stage PFE.</h2>
+    <p class="lead">Disponible pour un stage de fin d’études de 6 mois à partir de février 2027 (mobilité France / international).</p>
     <p><a class="mail" href="mailto:ahmedlayouni.17@gmail.com">ahmedlayouni.17@gmail.com</a></p>
-    <p class="links">
-      <a href="https://github.com/ahmed-lay">GitHub</a>
-      <a href="https://www.linkedin.com/in/ahmed-layounii/">LinkedIn</a>
-      <a href="CV_Ahmed_Layouni_PFE.pdf" download>CV en PDF</a>
-    </p>
-    <p class="where">Basé à Sousse, Tunisie — mobilité France / international pour stage PFE (février – juillet 2027).</p>
+    <div class="links">
+      <a class="btn btn-primary" href="https://github.com/ahmed-lay" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-ghost" href="https://www.linkedin.com/in/ahmed-layounii/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn btn-ghost" href="CV_Ahmed_Layouni_PFE.pdf" download>CV en PDF</a>
+    </div>
+    <p class="where">Sousse, Tunisie · Mobilité stage PFE (février – juillet 2027)</p>
   </section>
 </main>
 
-<footer class="wrap foot">© 2026 Ahmed Layouni</footer>
+<footer class="wrap foot">
+  <span>© 2026 Ahmed Layouni</span>
+  <span>Construit avec HTML, CSS &amp; JS</span>
+</footer>
 
 </body>
 </html>
